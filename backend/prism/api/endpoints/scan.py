@@ -1,32 +1,70 @@
 """
-Prism Scan API endpoints — Phase 2 stub.
+Prism Scan API endpoint — Phase 2.
 
-These endpoints will be fully implemented in Phase 2 (CLI + Web UI).
-Currently returns HTTP 501 with a clear phase-readiness message.
+POST /api/v1/scan/run  — run a mock behavioral scan (9 dimensions)
 """
 
-from fastapi import APIRouter
-from fastapi.responses import JSONResponse
+from __future__ import annotations
+
+from fastapi import APIRouter, HTTPException, status
+
+from prism.scan.engine import ScanDimension as EngineScanDimension, get_scan_engine
+from prism.schemas.models import ScanRequest, ScanResult, DimensionScore, ScanDimension
 
 router = APIRouter(prefix="/scan", tags=["Prism Scan"])
 
-_STUB_RESPONSE = {
-    "status": "not_implemented",
-    "phase": 2,
-    "message": (
-        "Prism Scan is implemented in Phase 2. "
-        "The 9-dimensional behavioral scan (sycophancy, hedging, calibration, "
-        "depth, coherence, focus, specificity, verbosity, repetition) and the "
-        "16-dimensional geometric separation ratio will be available then."
+
+@router.post(
+    "/run",
+    response_model=ScanResult,
+    summary="Run a 9-dimensional behavioral scan",
+    description=(
+        "Runs the Prism mock behavioral probe engine across up to 9 dimensions. "
+        "Phase 2 uses a seeded mock engine — real ROC-AUC-verified probes arrive in Phase 3."
     ),
-}
+    status_code=status.HTTP_200_OK,
+)
+def run_scan(body: ScanRequest) -> ScanResult:
+    # Map schema ScanDimension → engine ScanDimension
+    selected: list[EngineScanDimension] | None = None
+    if body.dimensions:
+        try:
+            selected = [EngineScanDimension(d.value) for d in body.dimensions]
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={"error": "invalid_dimension", "message": str(exc)},
+            ) from exc
+
+    engine = get_scan_engine(mock=True)
+    report = engine.scan(body.model_id, dimensions=selected)
+
+    scores = [
+        DimensionScore(
+            dimension=ScanDimension(ds.dimension.value),
+            score=ds.score,
+            raw_value=ds.raw_value,
+            interpretation=ds.interpretation,
+        )
+        for ds in report.scores
+    ]
+
+    return ScanResult(
+        model_id=report.model_id,
+        scores=scores,
+        geometric_separation_ratio=report.geometric_separation_ratio,
+        scan_duration_ms=report.scan_duration_ms,
+    )
 
 
-@router.post("/run", summary="[Phase 2] Run a behavioral scan")
-async def run_scan() -> JSONResponse:
-    return JSONResponse(status_code=501, content=_STUB_RESPONSE)
-
-
-@router.get("/results/{scan_id}", summary="[Phase 2] Get scan results")
-async def get_scan_results(scan_id: str) -> JSONResponse:
-    return JSONResponse(status_code=501, content={**_STUB_RESPONSE, "scan_id": scan_id})
+@router.get("/results/{scan_id}", summary="Get scan results by ID", include_in_schema=False)
+async def get_scan_results(scan_id: str) -> dict:
+    # Phase 4 will wire this to persisted scan results
+    raise HTTPException(
+        status_code=status.HTTP_501_NOT_IMPLEMENTED,
+        detail={
+            "error": "not_implemented",
+            "message": "Scan result retrieval by ID arrives in Phase 4.",
+            "scan_id": scan_id,
+        },
+    )

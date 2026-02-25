@@ -452,10 +452,20 @@ class TestResolverEndpoints:
         data = resp.json()
         assert data["model_type"] == "llama"
 
-    def test_scan_returns_501(self, client):
-        resp = client.post("/api/v1/scan/run")
-        assert resp.status_code == 501
-        assert resp.json()["phase"] == 2
+    def test_scan_run_returns_scan_result(self, client):
+        resp = client.post(
+            "/api/v1/scan/run",
+            json={"model_id": "mistralai/Mistral-7B-v0.1"},
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["model_id"] == "mistralai/Mistral-7B-v0.1"
+        assert len(data["scores"]) == 9
+        assert "geometric_separation_ratio" in data
+        assert "scan_duration_ms" in data
+        # Verify score range
+        for s in data["scores"]:
+            assert 0.0 <= s["score"] <= 1.0
 
     def test_generate_returns_501(self, client):
         resp = client.post("/api/v1/generate/lora")
