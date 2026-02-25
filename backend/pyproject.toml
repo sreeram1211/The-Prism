@@ -28,6 +28,8 @@ dependencies = [
     "passlib[bcrypt]>=1.7.4",
     # Rich output (shared with CLI in Phase 2)
     "rich>=13.9.0",
+    # CLI (Phase 2)
+    "typer>=0.15.0",
 ]
 
 [project.optional-dependencies]
