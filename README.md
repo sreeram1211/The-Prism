@@ -1,6 +1,6 @@
 # The Prism
 
-**Local-first AI behavioral manifold tooling suite by BuildMaxxing.**
+**Local-first AI behavioral manifold tooling suite by Sreeram 1211.**
 
 The Prism maps, monitors, and manipulates LLM behavior using a proprietary
 16-dimensional fiber space. It gives you a full diagnostic and steering pipeline
