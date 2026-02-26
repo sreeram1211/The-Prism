@@ -200,7 +200,7 @@ class MockPrismScanEngine(PrismScanEngine):
     def scan(
         self,
         model_id: str,
-        prompts: list[str] | None = None,
+        prompts: list[str] | None = None,  # reserved for real engine; unused by mock
         *,
         dimensions: list[ScanDimension] | None = None,
     ) -> ScanReport:

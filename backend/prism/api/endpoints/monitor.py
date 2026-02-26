@@ -20,7 +20,7 @@ router = APIRouter(prefix="/monitor", tags=["Prism Monitor"])
 
 _stream = PrismTelemetryStream()
 
-# In-memory session store (Phase 5 mock)
+# NOTE: In-process store — single-worker only. Phase 6 will migrate to SQLite.
 _sessions: dict[str, TelemetrySession] = {}
 
 

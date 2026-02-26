@@ -9,6 +9,7 @@ The real implementation will use Qdrant / ChromaDB with dense embeddings.
 
 from __future__ import annotations
 
+import re
 import time
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -90,6 +91,11 @@ class PrismMemory:
     # RSI α' — acceleration of improvement across turns
     # ------------------------------------------------------------------
 
+    def clear_session(self, session_id: str) -> None:
+        """Remove all memory entries and quality signals for a session."""
+        self._store.pop(session_id, None)
+        self._quality_signals.pop(session_id, None)
+
     def record_quality_signal(self, session_id: str, signal: float) -> None:
         """Record a per-turn quality signal (0.0–1.0) for α' computation."""
         self._quality_signals[session_id].append(max(0.0, min(1.0, signal)))
@@ -132,12 +138,8 @@ _STOPWORDS = {
 
 
 def _tokenize(text: str) -> set[str]:
-    tokens = set()
-    for word in text.lower().split():
-        word = "".join(c for c in word if c.isalnum())
-        if word and word not in _STOPWORDS and len(word) > 2:
-            tokens.add(word)
-    return tokens
+    words = re.findall(r'\b[a-z0-9]{3,}\b', text.lower())
+    return {w for w in words if w not in _STOPWORDS}
 
 
 def _overlap_score(q: set[str], d: set[str]) -> float:
