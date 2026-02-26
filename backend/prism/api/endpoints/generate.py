@@ -16,7 +16,7 @@ router = APIRouter(prefix="/generate", tags=["Prism Generate"])
 
 _engine = PrismGenerateEngine()
 
-# In-memory job store (Phase 4 mock — no persistence)
+# NOTE: In-process store — single-worker only. Phase 6 will migrate to SQLite.
 _jobs: dict[str, GenerateLoRAResult] = {}
 
 
@@ -47,8 +47,8 @@ def generate_lora(body: GenerateRequest) -> GenerateLoRAResult:
     result = _engine.compile(
         model_id=body.model_id,
         targets=targets,
-        lora_rank=body.lora_rank if body.lora_rank != 16 else None,
-        lora_alpha=body.lora_alpha if body.lora_alpha != 32.0 else None,
+        lora_rank=body.lora_rank,
+        lora_alpha=body.lora_alpha,
     )
 
     out = GenerateLoRAResult(

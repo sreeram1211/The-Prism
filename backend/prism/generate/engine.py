@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
@@ -83,7 +84,6 @@ def _derive_rank(targets: BehavioralTargets, base_rank: int) -> int:
         + targets.calibration * 0.20
     )
     # Map 0–1 complexity to rank range 4–128 on log scale
-    import math
     log_rank = math.log2(4) + complexity * (math.log2(128) - math.log2(4))
     raw_rank = 2 ** round(log_rank)
     # Clamp

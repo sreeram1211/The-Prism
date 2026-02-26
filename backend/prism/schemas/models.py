@@ -201,8 +201,17 @@ class GenerateRequest(BaseModel):
     model_id: str
     revision: str = "main"
     behavioral_targets: BehavioralTarget
-    lora_rank: int = Field(default=16, ge=4, le=256)
-    lora_alpha: float = Field(default=32.0, gt=0.0)
+    lora_rank: int | None = Field(
+        default=None,
+        ge=4,
+        le=256,
+        description="LoRA rank. If omitted, derived automatically from behavioral targets.",
+    )
+    lora_alpha: float | None = Field(
+        default=None,
+        gt=0.0,
+        description="LoRA alpha. If omitted, derived automatically as 2 × rank.",
+    )
     output_path: str | None = None
 
 

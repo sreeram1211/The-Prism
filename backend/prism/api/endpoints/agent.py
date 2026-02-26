@@ -19,6 +19,9 @@ from prism.schemas.models import AgentChatRequest, AgentChatResponse
 
 router = APIRouter(prefix="/agent", tags=["Prism Agent"])
 
+# NOTE: These module-level globals are intentionally in-process for Phase 5.
+# Prism is designed for local single-worker use (uvicorn --workers 1).
+# Multi-worker deployments would require shared state (Redis / DB) — planned for Phase 6.
 _memory = PrismMemory()
 # session_id → turn_index counter
 _turn_counters: dict[str, int] = {}
@@ -35,7 +38,12 @@ _turn_counters: dict[str, int] = {}
     status_code=status.HTTP_200_OK,
 )
 def chat(body: AgentChatRequest) -> AgentChatResponse:
-    session_id = body.session_id or str(uuid.uuid4())[:12]
+    # Only reuse a client-supplied session_id if it already exists; otherwise
+    # generate a new one server-side to prevent session hijacking.
+    if body.session_id and body.session_id in _turn_counters:
+        session_id = body.session_id
+    else:
+        session_id = str(uuid.uuid4())[:12]
 
     turn_index = _turn_counters.get(session_id, 0)
     _turn_counters[session_id] = turn_index + 1
@@ -137,8 +145,7 @@ def get_analytics(session_id: str) -> dict[str, Any]:
     status_code=status.HTTP_204_NO_CONTENT,
 )
 def clear_session(session_id: str) -> None:
-    _memory._store.pop(session_id, None)
-    _memory._quality_signals.pop(session_id, None)
+    _memory.clear_session(session_id)
     _turn_counters.pop(session_id, None)
 
 
