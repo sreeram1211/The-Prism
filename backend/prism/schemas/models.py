@@ -214,9 +214,37 @@ class GenerateResult(BaseModel):
     estimated_duration_s: float | None
 
 
+class GenerateLoRAResult(BaseModel):
+    """Phase 4: full LoRA config result returned by /generate/lora."""
+
+    job_id: str
+    status: str
+    model_id: str
+    lora_rank: int
+    lora_alpha: float
+    lora_dropout: float
+    target_modules: list[str]
+    adapter_config: dict[str, Any]
+    training_yaml: str
+    trainable_params: int
+    estimated_size_mb: float
+
+
 # ===========================================================================
-# Monitor / Telemetry (Phase 4)
+# Monitor / Telemetry (Phase 5)
 # ===========================================================================
+
+class MonitorSessionCreate(BaseModel):
+    model_id: str
+    layers: list[int] | None = Field(
+        default=None,
+        description="Layer indices to monitor. Defaults to [0, 8, 16, 24].",
+    )
+    prompt: str = Field(
+        default="Tell me about large language models.",
+        description="Prompt to generate activations from.",
+    )
+
 
 class MonitorSession(BaseModel):
     session_id: str

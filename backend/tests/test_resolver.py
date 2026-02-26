@@ -467,20 +467,20 @@ class TestResolverEndpoints:
         for s in data["scores"]:
             assert 0.0 <= s["score"] <= 1.0
 
-    def test_generate_returns_501(self, client):
+    def test_generate_endpoint_live(self, client):
+        # Phase 4 is now implemented — missing body returns 422 (validation)
         resp = client.post("/api/v1/generate/lora")
-        assert resp.status_code == 501
-        assert resp.json()["phase"] == 3
+        assert resp.status_code == 422
 
-    def test_monitor_returns_501(self, client):
+    def test_monitor_endpoint_live(self, client):
+        # Phase 5 is now implemented — missing body returns 422 (validation)
         resp = client.post("/api/v1/monitor/sessions")
-        assert resp.status_code == 501
-        assert resp.json()["phase"] == 4
+        assert resp.status_code == 422
 
-    def test_agent_returns_501(self, client):
+    def test_agent_endpoint_live(self, client):
+        # Phase 5 is now implemented — missing body returns 422 (validation)
         resp = client.post("/api/v1/agent/chat")
-        assert resp.status_code == 501
-        assert resp.json()["phase"] == 5
+        assert resp.status_code == 422
 
     def test_openapi_schema_accessible(self, client):
         resp = client.get("/openapi.json")

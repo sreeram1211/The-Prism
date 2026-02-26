@@ -9,6 +9,7 @@ const navItems = [
   { label: "Scan", href: "/scan", icon: "◈" },
   { label: "Generate", href: "/generate", icon: "⬟" },
   { label: "Monitor", href: "/monitor", icon: "◉" },
+  { label: "Agent", href: "/agent", icon: "◈" },
 ];
 
 export function Nav() {
@@ -53,7 +54,7 @@ export function Nav() {
         {/* Status dot */}
         <div className="flex items-center gap-2 text-xs text-[--muted-fg]">
           <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="hidden sm:block">Phase 3</span>
+          <span className="hidden sm:block">Phase 5</span>
         </div>
       </nav>
     </header>
