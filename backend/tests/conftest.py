@@ -12,6 +12,26 @@ from fastapi.testclient import TestClient
 
 from prism.main import app
 
+# ---------------------------------------------------------------------------
+# Click 8.3 + Rich + pytest capture fix
+# ---------------------------------------------------------------------------
+# Click 8.3's CliRunner wraps its captured BytesIO in _NamedTextIOWrapper.
+# When Console (file=sys.stdout) is GC'd after a command returns, CPython
+# immediately calls TextIOWrapper.__del__ → close() → BytesIOCopy.close(),
+# which marks the BytesIO as closed *before* CliRunner calls
+# outstreams[0].getvalue() — raising "ValueError: I/O operation on closed
+# file".  Making close() a no-op (the buffer is in-memory anyway) prevents
+# the premature closure while still allowing normal GC of the object graph.
+import click.testing as _ct
+
+class _SafeBytesIOCopy(_ct.BytesIOCopy):
+    """BytesIOCopy whose close() is a no-op to prevent premature closure."""
+
+    def close(self) -> None:  # noqa: D102
+        pass  # intentionally suppress; StreamMixer.__del__ will free memory
+
+_ct.BytesIOCopy = _SafeBytesIOCopy  # patch before any CliRunner isolation runs
+
 
 # ---------------------------------------------------------------------------
 # FastAPI test client
