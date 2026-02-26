@@ -76,6 +76,50 @@ export interface AgentChatResponse {
   alpha_prime: number | null;
 }
 
+// Phase 6 — History + Compare + Dashboard
+
+export interface ScanHistoryItem {
+  scan_id: string;
+  model_id: string;
+  created_at: string;
+  duration_ms: number;
+  geometric_separation_ratio: number;
+  top_score: DimensionScore;
+}
+
+export interface ScanHistoryResponse {
+  items: ScanHistoryItem[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface DimensionDelta {
+  dimension: string;
+  score_a: number;
+  score_b: number;
+  delta: number;
+  direction: string;
+}
+
+export interface CompareResult {
+  scan_id_a: string;
+  scan_id_b: string;
+  model_a: string;
+  model_b: string;
+  deltas: DimensionDelta[];
+  composite_distance: number;
+  winner: string;
+}
+
+export interface DashboardStats {
+  total_scans: number;
+  total_jobs: number;
+  total_sessions: number;
+  unique_models: number;
+  recent_scans: ScanHistoryItem[];
+}
+
 // ---------------------------------------------------------------------------
 // API calls
 // ---------------------------------------------------------------------------
@@ -155,6 +199,38 @@ export async function agentChat(
       use_memory: useMemory,
     }),
   });
+}
+
+// ---------------------------------------------------------------------------
+// Phase 6 — History, Compare, Dashboard
+// ---------------------------------------------------------------------------
+
+export async function getScanHistory(
+  modelId?: string,
+  limit = 20,
+  offset = 0,
+): Promise<ScanHistoryResponse> {
+  const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
+  if (modelId) params.set("model_id", modelId);
+  return apiFetch<ScanHistoryResponse>(`/api/v1/scan/history?${params}`);
+}
+
+export async function getScanResult(scanId: string): Promise<ScanReport> {
+  return apiFetch<ScanReport>(`/api/v1/scan/results/${scanId}`);
+}
+
+export async function compareScans(
+  scanA: string,
+  scanB: string,
+): Promise<CompareResult> {
+  return apiFetch<CompareResult>("/api/v1/compare", {
+    method: "POST",
+    body: JSON.stringify({ scan_a: scanA, scan_b: scanB }),
+  });
+}
+
+export async function getDashboardStats(): Promise<DashboardStats> {
+  return apiFetch<DashboardStats>("/api/v1/dashboard/stats");
 }
 
 // ---------------------------------------------------------------------------
