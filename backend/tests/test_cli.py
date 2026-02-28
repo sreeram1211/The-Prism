@@ -61,12 +61,12 @@ class TestVersion:
         result = runner.invoke(app, ["--version"])
         assert result.exit_code == 0
         assert "Prism" in result.output
-        assert "1.0.0" in result.output
+        assert "0.6.0" in result.output
 
     def test_short_version_flag(self):
         result = runner.invoke(app, ["-V"])
         assert result.exit_code == 0
-        assert "1.0.0" in result.output
+        assert "0.6.0" in result.output
 
 
 # ---------------------------------------------------------------------------
@@ -228,7 +228,7 @@ class TestInfoCommand:
 
     def test_info_shows_version(self):
         result = runner.invoke(app, ["info"])
-        assert "1.0.0" in result.output
+        assert "0.6.0" in result.output
 
     def test_info_shows_feature_table(self):
         result = runner.invoke(app, ["info"])

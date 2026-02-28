@@ -21,6 +21,7 @@ from fastapi.responses import JSONResponse
 from prism import __version__
 from prism.api.router import api_router
 from prism.config import get_settings
+from prism.db.migrations import create_all
 from prism.schemas.models import HealthResponse
 
 logger = logging.getLogger(__name__)
@@ -36,9 +37,10 @@ settings = get_settings()
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan manager."""
     logger.info(
-        "🔷 The Prism %s starting up — phase 1 (Auto-Resolver active)",
+        "🔷 The Prism %s starting up — phase 6 (Persistence + Comparison active)",
         __version__,
     )
+    create_all()
     yield
     logger.info("🔷 The Prism shutting down.")
 

@@ -172,6 +172,7 @@ class DimensionScore(BaseModel):
 
 class ScanResult(BaseModel):
     model_id: str
+    scan_id: str | None = Field(default=None, description="Persisted scan ID (Phase 6+)")
     scores: list[DimensionScore]
     geometric_separation_ratio: float = Field(
         description="16-dim fiber space separation ratio (125x–1376x range)"
@@ -283,3 +284,62 @@ class AgentChatResponse(BaseModel):
         default=None,
         description="RSI engine acceleration metric (α') — improvement rate across sessions",
     )
+
+
+# ===========================================================================
+# Persistence / History (Phase 6)
+# ===========================================================================
+
+class ScanHistoryItem(BaseModel):
+    scan_id: str
+    model_id: str
+    created_at: str = Field(description="ISO-8601 UTC timestamp")
+    duration_ms: float
+    geometric_separation_ratio: float
+    top_score: DimensionScore
+
+
+class ScanHistoryResponse(BaseModel):
+    items: list[ScanHistoryItem]
+    total: int
+    limit: int
+    offset: int
+
+
+# ===========================================================================
+# Comparison (Phase 6)
+# ===========================================================================
+
+class CompareRequest(BaseModel):
+    scan_a: str = Field(..., description="Scan ID of the first model")
+    scan_b: str = Field(..., description="Scan ID of the second model")
+
+
+class DimensionDelta(BaseModel):
+    dimension: str
+    score_a: float
+    score_b: float
+    delta: float = Field(description="score_b − score_a")
+    direction: str = Field(description="'improved' | 'regressed' | 'neutral'")
+
+
+class CompareResult(BaseModel):
+    scan_id_a: str
+    scan_id_b: str
+    model_a: str
+    model_b: str
+    deltas: list[DimensionDelta]
+    composite_distance: float = Field(description="L2 distance in 9-dim score space")
+    winner: str = Field(description="'a' | 'b' | 'tie'")
+
+
+# ===========================================================================
+# Dashboard (Phase 6)
+# ===========================================================================
+
+class DashboardStats(BaseModel):
+    total_scans: int
+    total_jobs: int
+    total_sessions: int
+    unique_models: int
+    recent_scans: list[ScanHistoryItem]

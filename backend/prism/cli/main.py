@@ -24,6 +24,7 @@ from prism.cli.commands.cmd_scan     import scan_command
 from prism.cli.commands.cmd_generate import generate_command, monitor_command, agent_command
 from prism.cli.commands.cmd_serve    import serve_command
 from prism.cli.commands.cmd_info     import info_command
+from prism.cli.commands.cmd_history  import history_command, diff_command
 
 # ---------------------------------------------------------------------------
 # Root application
@@ -54,6 +55,8 @@ app.command("monitor",  help="[Phase 4, Pro] Real-time activation telemetry.")(m
 app.command("agent",    help="[Phase 5, Pro] Autonomous chat with vector memory.")(agent_command)
 app.command("serve",    help="Start the Prism FastAPI server.")(serve_command)
 app.command("info",     help="System info, dependency versions & license status.")(info_command)
+app.command("history",  help="[Phase 6] List recent behavioral scans.")(history_command)
+app.command("diff",     help="[Phase 6] Compare two model behavioral fingerprints.")(diff_command)
 
 # ---------------------------------------------------------------------------
 # Version flag
